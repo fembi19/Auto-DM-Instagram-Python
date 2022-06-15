@@ -9,8 +9,8 @@ from selenium.webdriver.common.action_chains import ActionChains
 from random import randint, uniform
 from time import time, sleep
 import logging
-import sqlite3
 
+import os
 from colorama import init
 from termcolor import colored
 init()
@@ -18,12 +18,14 @@ init()
 DEFAULT_IMPLICIT_WAIT = 1
 
 
-print('--------------------------------------------------------------------------------\n')
-print(colored('**-- Aplikasi Kirim Pesan Instagram Otomatis By Fembi Nur Ilham --**', 'blue'))
-print('--------------------------------------------------------------------------------\n')
-
-
 class InstaDM(object):
+    def judul(self):
+        os.system('clear')
+        os.system('cls' if os.name == 'nt' else 'clear')
+        print('--------------------------------------------------------------------------------\n')
+        print(colored(
+            '**-- Aplikasi Kirim Pesan Instagram Otomatis By Fembi Nur Ilham --**', 'blue'))
+        print('--------------------------------------------------------------------------------\n')
 
     def __init__(self, username, password, headless=True, instapy_workspace=None, profileDir=None):
         self.selectors = {
@@ -44,94 +46,98 @@ class InstaDM(object):
         # Selenium config
         options = webdriver.ChromeOptions()
 
-        if profileDir:
-            options.add_argument("user-data-dir=profiles/" + profileDir)
+        try:
+            print('Membuka Chrome..')
+            if profileDir:
+                options.add_argument("user-data-dir=profiles/" + profileDir)
 
-        if headless:
-            options.add_argument("--headless")
+            if headless:
+                options.add_argument("--headless")
 
-        mobile_emulation = {
-            "userAgent": 'Mozilla/5.0 (Linux; Android 10.0; iPhone Xs Max Build/IML74K) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/91.0.4472.77 Mobile Safari/535.19'
-        }
-        options.add_experimental_option("mobileEmulation", mobile_emulation)
-        options.add_argument("--log-level=3")
+            mobile_emulation = {
+                "userAgent": 'Mozilla/5.0 (Linux; Android 10.0; iPhone Xs Max Build/IML74K) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/91.0.4472.77 Mobile Safari/535.19'
+            }
+            options.add_experimental_option(
+                "mobileEmulation", mobile_emulation)
+            options.add_argument("--log-level=3")
 
-        self.driver = webdriver.Chrome(
-            executable_path=CM().install(), options=options)
-        print('--------------------------------------------------------------------------------\n')
-        # self.driver.set_window_position(0, 0)
-        # self.driver.set_window_size(414, 936)
-        self.driver.minimize_window()
+            self.driver = webdriver.Chrome(
+                executable_path=CM().install(), options=options)
+            print(
+                '--------------------------------------------------------------------------------\n')
+            self.driver.set_window_position(0, 0)
+            self.driver.set_window_size(414, 936)
+            self.driver.minimize_window()
 
-        print("Membuka Browser..")
-        # Instapy init DB
-        self.instapy_workspace = instapy_workspace
-        self.conn = None
-        self.cursor = None
-        if self.instapy_workspace is not None:
-            self.conn = sqlite3.connect(
-                self.instapy_workspace + "InstaPy/db/instapy.db")
-            self.cursor = self.conn.cursor()
+            self.judul()
+            print("Berhasil Membuka Browser Chrome..")
 
-            cursor = self.conn.execute("""
-                SELECT count(*)
-                FROM sqlite_master
-                WHERE type='table'
-                AND name='message';
-            """)
-            count = cursor.fetchone()[0]
-
-            if count == 0:
-                self.conn.execute("""
-                    CREATE TABLE "message" (
-                        "username"    TEXT NOT NULL UNIQUE,
-                        "message"    TEXT DEFAULT NULL,
-                        "sent_message_at"    TIMESTAMP
-                    );
-                """)
+        except:
+            self.judul()
+            print('Chrome Tidak Ditemukan, Silahkan Instal Browser Chrome')
+            self.__random_sleep__(5, 7)
+            quit()
 
         try:
             self.login(username, password)
         except Exception as e:
             logging.error(e)
             print(str(e))
+            quit()
 
     def login(self, username, password):
         # homepage
+        print("Mengunjungi Instagram..")
         self.driver.get('https://instagram.com/?hl=en')
-        self.__random_sleep__(3, 5)
+        self.__random_sleep__(5, 7)
 
-        if self.__wait_for_element__(self.selectors['accept_cookies'], 'xpath', 10):
+        print('Mencari Cookies..')
+        if self.__wait_for_element__(self.selectors['accept_cookies'], 'xpath', 5):
             self.__get_element__(
                 self.selectors['accept_cookies'], 'xpath').click()
+            print("Cookies Accept")
+        else:
+            print('Cookies Tak itemukan')
 
-        if self.__wait_for_element__(self.selectors['home_to_login_button'], 'xpath', 10):
+        print('Bersiap Login..')
+        if self.__wait_for_element__(self.selectors['home_to_login_button'], 'xpath', 5):
             self.__get_element__(
                 self.selectors['home_to_login_button'], 'xpath').click()
+            print('Mengarahkan ke Halaman Login')
             self.__random_sleep__(5, 7)
+        else:
+            self.judul()
+            print('Gagal Masuk Halaman Login')
+            input('Silahkan Jalankan Kembali')
 
         # login
-        print(f'Mencoba Login Ke Akun {username} ..')
+        print(f'Mencoba Login Ke Akun {username}')
         logging.info(f'Login with {username}')
 
         self.__scrolldown__()
-        if not self.__wait_for_element__(self.selectors['username_field'], 'name', 10):
+        if not self.__wait_for_element__(self.selectors['username_field'], 'name', 5):
             print('Username Tidak Valid')
             sys.exit()
         else:
             self.driver.find_element_by_name(
                 self.selectors['username_field']).send_keys(username)
+            print("Menginput Username")
             self.driver.find_element_by_name(
                 self.selectors['password_field']).send_keys(password)
+            print("Menginput Password")
+            self.__random_sleep__()
             self.__get_element__(
                 self.selectors['button_login'], 'xpath').click()
+            print("Submit")
             self.__random_sleep__()
-            if self.__wait_for_element__(self.selectors['login_check'], 'xpath', 10):
-                print('Berhasil Login...')
-                print('')
+            if self.__wait_for_element__(self.selectors['login_check'], 'xpath', 5):
+                self.judul()
+                print('Berhasil Login')
             else:
+                self.judul()
                 print('Login Gagal')
-                sys.exit()
+                input('Silahkan Jalankan Kembali')
+                quit()
 
     def createCustomGreeting(self, greeting):
         # Get username and add custom greeting
@@ -146,28 +152,34 @@ class InstaDM(object):
 
     def typeMessage(self, user, message):
         # Go to page and type message
+
+        print('Membuka Pesan')
         if self.__wait_for_element__(self.selectors['next_button'], "xpath"):
             self.__get_element__(
                 self.selectors['next_button'], "xpath").click()
             self.__random_sleep__()
 
+        print('Mengetik Pesan')
         if self.__wait_for_element__(self.selectors['textarea'], "xpath"):
             self.__type_slow__(self.selectors['textarea'], "xpath", message)
             self.__random_sleep__()
 
+        print('Mengirim Pesan')
         if self.__wait_for_element__(self.selectors['send'], "xpath"):
             self.__get_element__(self.selectors['send'], "xpath").click()
-            self.__random_sleep__(2, 3)
             print('Terkirim')
+            self.__random_sleep__(2, 3)
+            self.judul()
             print('')
 
     def sendMessage(self, user, message, greeting=None):
         logging.info(f'Send message to {user}')
         print(f'Mengirim Pesan Ke {user}')
         self.driver.get('https://www.instagram.com/direct/new/?hl=en')
-        self.__random_sleep__(2, 3)
+        self.__random_sleep__(5, 7)
 
         try:
+            print('Mencari Username')
             self.__wait_for_element__(self.selectors['search_user'], "name")
             self.__type_slow__(self.selectors['search_user'], "name", user)
             self.__random_sleep__(1, 2)
@@ -178,8 +190,10 @@ class InstaDM(object):
             # Select user from list
             elements = self.driver.find_elements_by_xpath(
                 self.selectors['select_user'].format(user))
+
             if elements and len(elements) > 0:
                 elements[0].click()
+                print('Username ditemukan')
                 self.__random_sleep__()
 
                 if greeting != None:
@@ -187,10 +201,6 @@ class InstaDM(object):
                 else:
                     self.typeMessage(user, message)
 
-                if self.conn is not None:
-                    self.cursor.execute(
-                        'INSERT INTO message (username, message) VALUES(?, ?)', (user, message))
-                    self.conn.commit()
                 self.__random_sleep__(2, 3)
 
                 return True
@@ -301,10 +311,11 @@ class InstaDM(object):
             elif locator == 'CSS' and self.is_element_present(By.CSS_SELECTOR, element_tag):
                 return WebDriverWait(dr, 15).until(lambda d: dr.find_element_by_css_selector(element_tag))
             else:
-                logging.info(f"Error: Incorrect locator = {locator}")
+                print('')
+                # logging.info(f"Error: Incorrect locator = {locator} element = {element_tag}")
         except Exception as e:
             logging.error(e)
-        logging.info(f"Element not found with {locator} : {element_tag}")
+            # logging.info(f"Element not found with {locator} : {element_tag}")
         return None
 
     def is_element_present(self, how, what):
@@ -342,9 +353,8 @@ class InstaDM(object):
                 print(f"Exception when __wait_for_element__ : {e}")
 
             sleep(1 - (time() - initTime))
-        else:
+        # else:
             # print(f"Timed out. Element not found with {locator} : {element_tag}")
-            print("")
         self.driver.implicitly_wait(DEFAULT_IMPLICIT_WAIT)
         return result
 
