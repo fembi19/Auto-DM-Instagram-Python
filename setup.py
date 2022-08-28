@@ -8,15 +8,15 @@ from termcolor import colored
 f = open('setting/accounts.json',)
 accounts = json.load(f)
 
-with open('setting/usernames.txt', 'r') as f:
-    usernames = [line.strip() for line in f]
+with open('setting/usernames.txt', 'r') as fd:
+    usernames = [linee.strip() for linee in fd]
 
 with open('setting/messages.txt', 'r') as f:
     messages = [line.strip() for line in f]
 
 
 print('--------------------------------------------------------------------------------\n')
-print(colored('**-- Aplikasi Kirim Pesan Instagram Otomatis By Fembi Nur Ilham --**', 'blue'))
+print(colored('**-- Aplikasi Kirim Pesan Instagram Otomatis By Fembi Nur Ilham --**', 'white'))
 print('--------------------------------------------------------------------------------\n')
 
 
@@ -48,7 +48,9 @@ while True:
         total = 0
         for i in range(len(usernames)):
             total += 1
-            progress(round(total/len(usernames)*100))
+            progress(round((1/len(usernames))*100))
+            print(' ')
+            print(f'Tersisa : {len(usernames)}')
             print(' ')
 
             if not usernames:

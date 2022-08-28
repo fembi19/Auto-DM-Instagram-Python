@@ -166,17 +166,25 @@ class InstaDM(object):
 
         print('Mengirim Pesan')
         if self.__wait_for_element__(self.selectors['send'], "xpath"):
+            self.__random_sleep__()
             self.__get_element__(self.selectors['send'], "xpath").click()
             print('Terkirim')
             self.__random_sleep__(2, 3)
+            self.driver.refresh()
+            self.__random_sleep__(2, 3)
             self.judul()
             print('')
+        else:
+            print(f'Username {user} Gagal Terkirim')
+            print('')
+            self.driver.refresh()
+            self.__random_sleep__(2, 3)
 
     def sendMessage(self, user, message, greeting=None):
         logging.info(f'Send message to {user}')
         print(f'Mengirim Pesan Ke {user}')
         self.driver.get('https://www.instagram.com/direct/new/?hl=en')
-        self.__random_sleep__(5, 7)
+        self.__random_sleep__(2, 3)
 
         try:
             print('Mencari Username')
@@ -201,13 +209,14 @@ class InstaDM(object):
                 else:
                     self.typeMessage(user, message)
 
-                self.__random_sleep__(2, 3)
+                self.__random_sleep__(2, 4)
 
                 return True
 
             # In case user has changed his username or has a private account
             else:
-                print(f'User {user} not found! Skipping.')
+                print(f'User {user} Tidak ditemukan')
+                print('')
                 return False
 
         except Exception as e:
@@ -326,8 +335,8 @@ class InstaDM(object):
             return False
         return True
 
-    def __wait_for_element__(self, element_tag, locator, timeout=1):
-        """Wait till element present. Max 1 seconds"""
+    def __wait_for_element__(self, element_tag, locator, timeout=2):
+        """Wait till element present. Max 2 seconds"""
         result = False
         self.driver.implicitly_wait(0)
         locator = locator.upper()
